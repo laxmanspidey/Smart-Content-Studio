@@ -83,6 +83,7 @@ if st.session_state['username']:
 
 # Authentication form
 def auth_form():
+    st.image("https://internal-blog.contentstudio.io/wp-content/uploads/2023/04/image26-4.jpg", use_container_width=True)
     auth_option = st.selectbox('Select Authentication Method', ['Login', 'Signup'])
     
     if auth_option == 'Signup':
