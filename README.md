@@ -1,7 +1,7 @@
 # All in one Text generation Project 
 
 ## Live Website Link
-[Textgen](https://textgen.streamlit.app/)
+[Textgen](https://smart-content-studio.streamlit.app/)
 
 ## Installation
 
