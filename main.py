@@ -73,7 +73,7 @@ if 'username' not in st.session_state:
 # Logout functionality
 def logout():
     st.session_state['username'] = None
-    st.experimental_rerun()
+    st.rerun()
 
 # Top-right logout button
 if st.session_state['username']:
