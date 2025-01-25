@@ -4,6 +4,7 @@ import bcrypt
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
+from PIL import Image
 
 load_dotenv()
 
@@ -72,7 +73,7 @@ if 'username' not in st.session_state:
 # Logout functionality
 def logout():
     st.session_state['username'] = None
-    st.rerun()
+    st.experimental_rerun()
 
 # Top-right logout button
 if st.session_state['username']:
@@ -115,15 +116,7 @@ def auth_form():
 if st.session_state['username'] is None:
     auth_form()
 else:
-    #st.write(f'Hello {st.session_state["username"]}!')
-
     # Content generation section
-    # st.markdown("""
-    #     <div class="header">
-    #         <h2>✨ Content Generation ✨</h2>
-    #     </div>
-    #     """, unsafe_allow_html=True)
-
     mailtype = ""
     Reply = ""
     optionpg1 = ""
@@ -133,7 +126,7 @@ else:
         
         option = st.selectbox(
             'Select type of app you want?',
-            ('Email Generation', 'Post Generation', 'Essay Generation', 'Text Generation'))
+            ('Email Generation', 'Post Generation', 'Essay Generation', 'Text Generation', 'Image Captioning and Tagging'))
 
         if option == "Post Generation":
             optionpg1 = st.selectbox('Choose Social Media', ('Linkedin', 'Twitter/X'))
@@ -315,6 +308,39 @@ else:
             elif submitted:
                 response = generate(prompt)
                 st.write(response.text)
+
+    if option == "Image Captioning and Tagging":
+        #st.markdown("### Image Captioning, Tagging, and Description")
+        uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
+
+        if uploaded_file is not None:
+            if st.button('Upload'):
+                if api_key.strip() == '':
+                    st.error('Enter a valid API key')
+                else:
+                    # Create the 'temp' directory if it doesn't exist
+                    if not os.path.exists("temp"):
+                        os.makedirs("temp")
+                    
+                    file_path = os.path.join("temp", uploaded_file.name)
+                    with open(file_path, "wb") as f:
+                        f.write(uploaded_file.getvalue())
+                    img = Image.open(file_path)
+                    try:
+                        genai.configure(api_key=api_key)
+                        model = genai.GenerativeModel('gemini-1.5-flash')
+                        caption = model.generate_content(["Write a caption for the image in english", img])
+                        tags = model.generate_content(["Generate 5 hash tags for the image in a line in english", img])
+                        st.image(img, caption=f"Caption: {caption.text}")
+                        st.write(f"Tags: {tags.text}")
+                        desc = model.generate_content(["Generate description for the image without mentioning like here is the description", img])
+                        st.write(f"\nDescription: {desc.text}")
+                    except Exception as e:
+                        error_msg = str(e)
+                        if "API_KEY_INVALID" in error_msg:
+                            st.error("Invalid API Key. Please enter a valid API Key.")
+                        else:
+                            st.error(f"Failed to configure API due to {error_msg}")
 
 # Hide Streamlit style
 hide_st_style = """
